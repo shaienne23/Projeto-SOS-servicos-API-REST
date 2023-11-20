@@ -1,7 +1,5 @@
 # Projeto-SOS-servicos-API-REST
 
-# Projeto SOS Serviços API REST
-
 ## API Criada para back de projeto front posterior 
 
 ## Banco de dados
