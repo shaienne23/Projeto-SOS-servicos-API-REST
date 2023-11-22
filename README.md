@@ -44,9 +44,6 @@ status (string - por exemplo, "pendente", "concluído")
 Tabela orcamentos:
 Armazenará informações sobre os orçamentos solicitados.
 
-Tabela orcamento_itens:
-Se um orçamento puder incluir vários itens, você pode criar uma tabela separada para armazenar esses itens.
-
 Tabela emails_enviados:
 Armazenará registros de emails enviados para que você possa rastrear quais emails foram enviados para quais clientes.
 
@@ -299,6 +296,42 @@ Resposta:
 Retorna uma mensagem indicando o sucesso da remoção.
 
 ## Fazer Orçamentos de serviços com retorno por email
+
+Rota para Solicitar Orçamento por Email
+
+Método HTTP: POST
+Endpoint: /orcamento/solicitar
+Descrição: Inicia o processo de solicitação de orçamento por email.
+Parâmetros do Corpo:
+servicoId: ID do serviço para o qual o cliente está solicitando o orçamento.
+clienteEmail: O endereço de email do cliente para onde o orçamento será enviado.
+Outros detalhes específicos necessários para a solicitação de orçamento.
+Validações:
+
+Certifique-se de que o servicoId é válido.
+Verifique se o clienteEmail é um formato de email válido.
+Execute outras validações específicas necessárias para o seu caso.
+Resposta em Caso de Sucesso:
+
+Status code 200 / 201 / 204.
+Pode conter uma mensagem indicando que a solicitação foi recebida com sucesso.
+Implementação:
+
+Ao receber a solicitação de orçamento, envie um email ao cliente com os detalhes do orçamento e qualquer outra informação relevante.
+Lembre-se de configurar um serviço de envio de email na sua aplicação. Você pode utilizar bibliotecas como Nodemailer (Node.js) ou alguma outra adequada à linguagem que está utilizando.
+
+Exemplo de Requisição:
+
+jsonCopy code
+// POST /orcamento/solicitar {
+
+"servicoId": 1,
+
+"clienteEmail": "cliente@email.com",
+
+"detalhes": "Quero um orçamento para o serviço X com as seguintes especificações..."
+
+}
 
 # Rotas Carrinho de compras
 
