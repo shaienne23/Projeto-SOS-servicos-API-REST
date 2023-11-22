@@ -1,45 +1,59 @@
 # Projeto-SOS-servicos-API-REST
 
-## API Criada para back de projeto front posterior 
+## API Criada para back de projeto front posterior
 
 ## Banco de dados
-Você precisa criar um Banco de Dados PostgreSQL chamado dindin contendo as seguintes tabelas e colunas:
-ATENÇÃO! Os nomes das tabelas e das colunas a serem criados devem seguir exatamente os nomes listados abaixo.
 
-usuarios
-id
-nome
-email (campo único)
-senha
-categorias
-id
-descricao
-transacoes
-id
-descricao
-valor
-data
-categoria_id
-usuario_id
-tipo
-IMPORTANTE: Deverá ser criado no projeto o(s) arquivo(s) SQL que deverá ser o script que cria as tabelas corretamente.
+Você precisa criar um Banco de Dados PostgreSQL chamado Sos_Servicos contendo as seguintes tabelas e colunas:
 
-As categorias a seguir precisam ser previamente cadastradas para que sejam listadas no endpoint de listagem das categorias.
+Usuários:
+id (chave primária)
+nome (string, obrigatório)
+email (string, único, obrigatório)
+senha (string, obrigatório - deve ser armazenado o hash da senha)
+cpf (string, único, obrigatório)
 
-Categorias
-Alimentação
-Assinaturas e Serviços
-Casa
-Mercado
-Cuidados Pessoais
-Educação
-Família
-Lazer
-Pets
+Tokens:
+id (chave primária)
+token (string, obrigatório)
+usuario_id (chave estrangeira referenciando a tabela usuarios)
+
+Carrinhos:
+id (chave primária)
+usuario_id (chave estrangeira referenciando a tabela usuarios)
+
+ItensCarrinho:
+id (chave primária)
+carrinho_id (chave estrangeira referenciando a tabela carrinhos)
+servico_id (chave estrangeira referenciando a tabela servicos)
+quantidade (inteiro, obrigatório)
+
+Serviços:
+id (chave primária)
+nome (string, obrigatório)
+descricao (string)
+categoria (string)
+preco (decimal, obrigatório)
+
+Pagamentos:
+id (chave primária)
+servico_id (chave estrangeira referenciando a tabela servicos)
+valor (decimal, obrigatório)
+status (string - por exemplo, "pendente", "concluído")
+
+Tabela orcamentos:
+Armazenará informações sobre os orçamentos solicitados.
+
+Tabela orcamento_itens:
+Se um orçamento puder incluir vários itens, você pode criar uma tabela separada para armazenar esses itens.
+
+Tabela emails_enviados:
+Armazenará registros de emails enviados para que você possa rastrear quais emails foram enviados para quais clientes.
 
 # Rotas Usuarios
 
-## POST - Cadastro 
+## POST - Cadastro
+
 **POST /usuario/cadastrar**
 Essa é a rota que será utilizada para cadastrar um novo usuario no sistema.
 
@@ -69,25 +83,25 @@ Cadastrar o usuário no banco de dados
 Exemplo de requisição
 // POST /usuario
 {
-    "nome": "José",
-    "email": "jose@email.com",
-    "senha": "123456"
-    "cpf": "101.877.296-03"
+"nome": "José",
+"email": "jose@email.com",
+"senha": "123456"
+"cpf": "101.877.296-03"
 }
 Exemplos de resposta
 // HTTP Status 200 / 201 / 204
 {
-    "id": 1,
-    "nome": "José",
-    "email": "jose@email.com"
+"id": 1,
+"nome": "José",
+"email": "jose@email.com"
 }
 // HTTP Status 400 / 401 / 403 / 404
 {
-    "mensagem": "Já existe usuário cadastrado com o e-mail informado."
+"mensagem": "Já existe usuário cadastrado com o e-mail informado."
 }
 
+## POST - Login
 
-## POST - Login 
 **POST /login**
 Essa é a rota que permite o usuario cadastrado realizar o login no sistema.
 
@@ -105,31 +119,31 @@ Em caso de falha na validação, a resposta deverá possuir status code apropria
 REQUISITOS OBRIGATÓRIOS
 
 Validar os campos obrigatórios:
-email: Verificar se o e-mail existe no BD 
+email: Verificar se o e-mail existe no BD
 senha: Validar senha e tamanho da senha
-
 
 Criar token de autenticação com id do usuário
 Exemplo de requisição
 // POST /login
 {
-    "email": "jose@email.com",
-    "senha": "123456"
+"email": "jose@email.com",
+"senha": "123456"
 }
 Exemplos de resposta
 // HTTP Status 200 / 201 / 204
 {
-    "usuario": {
-        "id": 1,
-        "nome": "José",
-        "email": "jose@email.com"
-    },
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNjIzMjQ5NjIxLCJleHAiOjE2MjMyNzg0MjF9.KLR9t7m_JQJfpuRv9_8H2-XJ92TSjKhGPxJXVfX6wBI"
+"usuario": {
+"id": 1,
+"nome": "José",
+"email": "jose@email.com"
+},
+"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNjIzMjQ5NjIxLCJleHAiOjE2MjMyNzg0MjF9.KLR9t7m_JQJfpuRv9_8H2-XJ92TSjKhGPxJXVfX6wBI"
 }
 // HTTP Status 400 / 401 / 403 / 404
 {
-    "mensagem": "Usuário e/ou senha inválido(s)."
+"mensagem": "Usuário e/ou senha inválido(s)."
 }
+
 ### Todas as funcionalidades (endpoints) a seguir, a partir desse ponto, deverão exigir o token de autenticação do usuário logado, recebendo no header com o formato Bearer Token. Portanto, em cada funcionalidade será necessário validar o token informado.
 
 Validações do token
@@ -139,6 +153,7 @@ Verificar se o token é válido
 Consultar usuário no banco de dados pelo id contido no token informado.
 
 ## Detalhar usuário
+
 **GET /usuario/detalhar**
 Essa é a rota que será chamada quando o usuario quiser obter os dados do seu próprio perfil.
 Atenção!: O usuário deverá ser identificado através do ID presente no token de autenticação.
@@ -158,15 +173,17 @@ Exemplo de requisição
 Exemplos de resposta
 // HTTP Status 200 / 201 / 204
 {
-    "id": 1,
-    "nome": "José",
-    "email": "jose@email.com"
+"id": 1,
+"nome": "José",
+"email": "jose@email.com"
 }
 // HTTP Status 400 / 401 / 403 / 404
 {
-    "mensagem": "Para acessar este recurso um token de autenticação válido deve ser enviado."
+"mensagem": "Para acessar este recurso um token de autenticação válido deve ser enviado."
 }
+
 ## Atualizar usuário
+
 **PUT /usuario/atualizar**
 Essa é a rota que será chamada quando o usuário quiser realizar alterações no seu próprio usuário.
 Atenção!: O usuário deverá ser identificado através do ID presente no token de autenticação.
@@ -195,19 +212,20 @@ Exemplo de requisição
 
 // PUT /usuario
 {
-    "nome": "José de Abreu",
-    "email": "jose_abreu@email.com",
-    "senha": "j4321"
+"nome": "José de Abreu",
+"email": "jose_abreu@email.com",
+"senha": "j4321"
 }
 Exemplos de resposta
 // HTTP Status 200 / 201 / 204
 // Sem conteúdo no corpo (body) da resposta
 // HTTP Status 400 / 401 / 403 / 404
 {
-    "mensagem": "O e-mail informado já está sendo utilizado por outro usuário."
+"mensagem": "O e-mail informado já está sendo utilizado por outro usuário."
 }
 
-## DELETE - Deletar 
+## DELETE - Deletar
+
 **DELETE /usuario/deletar**
 
 Essa é a rota que será chamada quando o usuario logado quiser excluir o seu cadastro de usuario.
@@ -232,6 +250,7 @@ Exemplo de requisição
 # Rotas Serviços
 
 ## Listar Serviços
+
 Rota: Listar Serviços
 Método HTTP: GET
 Endpoint: /servicos
@@ -240,7 +259,9 @@ Parâmetros da Query String:
 Opcional: categoria para filtrar por categoria de serviço.
 Resposta:
 Retorna uma lista de serviços com detalhes.
+
 ## Cadastrar Serviços
+
 Rota: Cadastrar Serviços
 Método HTTP: POST
 Endpoint: /servicos
@@ -252,7 +273,9 @@ categoria: Categoria do serviço.
 preco: Preço do serviço.
 Resposta:
 Retorna os detalhes do serviço cadastrado.
+
 ## Editar Serviços
+
 Rota: Editar Serviços
 Método HTTP: PUT
 Endpoint: /servicos/:id
@@ -263,7 +286,9 @@ Parâmetros do Corpo:
 Opcionais: nome, descricao, categoria, preco para atualizar as informações.
 Resposta:
 Retorna os detalhes atualizados do serviço.
+
 ## Remover Serviços
+
 Rota: Remover Serviços
 Método HTTP: DELETE
 Endpoint: /servicos/:id
@@ -272,32 +297,33 @@ Parâmetros da URL:
 id: ID do serviço.
 Resposta:
 Retorna uma mensagem indicando o sucesso da remoção.
+
 ## Fazer Orçamentos de serviços com retorno por email
 
+# Rotas Carrinho de compras
 
-# Rotas Carrinho de compras 
 **POST /carrinho**
-	Requisição:
-•	Sem parâmetros de rota ou de query.
-•	O corpo (body) da requisição pode ser vazio, dependendo dos requisitos específicos do seu projeto.
+Requisição:
+• Sem parâmetros de rota ou de query.
+• O corpo (body) da requisição pode ser vazio, dependendo dos requisitos específicos do seu projeto.
 
 Resposta em Caso de Sucesso:
-•	Status code 200 / 201 / 204.
-•	O corpo da resposta deve conter um identificador único para o carrinho que será usado em operações subsequentes.
+• Status code 200 / 201 / 204.
+• O corpo da resposta deve conter um identificador único para o carrinho que será usado em operações subsequentes.
 
 **POST /carrinho/:carrinhoId/item**
 
 Requisição:
-•	Parâmetros de rota: carrinhoId - Identificador único do carrinho.
-•	O corpo (body) da requisição deve conter informações sobre o item a ser adicionado, como servicoId, quantidade, e outros detalhes específicos.
+• Parâmetros de rota: carrinhoId - Identificador único do carrinho.
+• O corpo (body) da requisição deve conter informações sobre o item a ser adicionado, como servicoId, quantidade, e outros detalhes específicos.
 
 Validações:
-•	Validar se o carrinho com o ID fornecido existe.
-•	Validar os dados do item a ser adicionado.
+• Validar se o carrinho com o ID fornecido existe.
+• Validar os dados do item a ser adicionado.
 
 Resposta em Caso de Sucesso:
-•	Status code 200 / 201 / 204.
-•	O corpo da resposta pode conter informações relevantes sobre o item adicionado ao carrinho.
+• Status code 200 / 201 / 204.
+• O corpo da resposta pode conter informações relevantes sobre o item adicionado ao carrinho.
 
 **GET /carrinho/:carrinhoId**
 Requisição:
@@ -312,7 +338,9 @@ Status code 200.
 O corpo da resposta deve conter uma lista de itens no carrinho, incluindo detalhes como servicoId, quantidade, preço, etc.
 
 # Rotas Transações
+
 ## Fazer pagamentos
+
 Rota: Fazer Pagamentos
 Método HTTP: POST
 Endpoint: /pagamentos/iniciar
@@ -345,7 +373,7 @@ id: ID da transação.
 Resposta:
 Retorna detalhes específicos da transação.
 
-## Obter extrato de transações**
+## Obter extrato de transações\*\*
 
 Rota: Obter Extrato de Transações
 Método HTTP: GET
@@ -356,8 +384,8 @@ Opcional: periodo para especificar o período do extrato (por exemplo, mês atua
 Resposta:
 Retorna um extrato de transações com informações resumidas.
 
-
 ## Status Codes
+
 Abaixo, listamos os possíveis status codes esperados como resposta da API.
 
 // 200 (OK) = requisição bem sucedida
@@ -367,4 +395,3 @@ Abaixo, listamos os possíveis status codes esperados como resposta da API.
 // 401 (Unauthorized) = o usuário não está autenticado (logado)
 // 403 (Forbidden) = o usuário não tem permissão de acessar o recurso solicitado
 // 404 (Not Found) = o servidor não pode encontrar o recurso solicitado
-
